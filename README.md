@@ -1,4 +1,6 @@
 plugin.video.hktv-app
 =====================
 
-XBMC/KODI HKTV Addon
+Unofficial XBMC/KODI HKTV Addon
+ - Live Channel
+ - VOD Channels

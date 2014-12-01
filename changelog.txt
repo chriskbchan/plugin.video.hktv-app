@@ -1,3 +1,6 @@
+v0.1.2
+- try to fix xbmc frodo 12.x compatibility
+
 v0.1.1
 - option to auto-start live channel
 - more program listings

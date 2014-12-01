@@ -396,7 +396,7 @@ elif mode == 1:
                 log('Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
                 dIndex += 1
 
-    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist, startpos=0)
+    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist)
 
 elif mode == 2:
 
@@ -448,5 +448,5 @@ elif mode == 3:
                 log('Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
                 dIndex += 1
 
-    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist, startpos=0)
+    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist)
 

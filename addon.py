@@ -2,7 +2,7 @@
 # HKTV App 香港電視
 # Written by chriskbchan
 
-import urllib, urllib2, urlparse, cookielib, json, uuid
+import urllib, urllib2, cookielib, json, uuid
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin
 import os, time, sys
 
@@ -19,7 +19,6 @@ videoLim = addon.getSetting('maxvideos')
 __addonname__ = addon.getAddonInfo('name')
 __addonicon__ = addon.getAddonInfo('icon')
 __addonprofile__ = addon.getAddonInfo('profile')
-
 
 
 def log(txt):
@@ -46,7 +45,6 @@ def parse_argv():
        mode = int(params.get('mode', None ))
     except:
        mode = None
-
 
 
 def dequote(u):

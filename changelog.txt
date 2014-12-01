@@ -1,2 +1,7 @@
+v0.1.1
+- option to auto-start live channel
+- more program listings
+- performance enhancement
+
 v0.0.1
 - initial version

@@ -4,9 +4,20 @@
 <!-- Report language file syntax bugs at: http://trac.xbmc.org/ -->
 
 <strings>
-    <string id="32010">HKTV 登入</string>
-    <string id="32011">用戶</string>
-    <string id="32012">密碼</string>
-    <string id="32020">一般</string>
-    <string id="32021">影片列表數目</string>
+    <string id="32100">HKTV 登入</string>
+    <string id="32111">電郵</string>
+    <string id="32112">密碼</string>
+    <string id="32200">一般</string>
+    <string id="32221">影片列表數目</string>
+    <string id="32222">自動開始直播頻道</string>
+    <string id="32223">影片列表暫存時限（秒）</string>
+    <string id="32300">其他</string>
+    <string id="32301">清除暫存檔案</string>
+
+    <string id="1000">直播頻道 自動開始中...</string>
+    <string id="1010">最近</string>
+    <string id="1020">所有節目</string>
+
+    <string id="9000">錯誤：未能登入HKTV</string>
+    <string id="9010">錯誤：未能處理cookies</string>
 </strings>

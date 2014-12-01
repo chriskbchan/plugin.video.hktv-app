@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <category label="32010">
-        <setting label="32011" type="text" id="username" default=""/>
-        <setting label="32012" type="text" id="password" option="hidden" enable="!eq(-1,)" default=""/>
+    <category label="32100">
+        <setting label="32111" type="text" id="username" default=""/>
+        <setting label="32112" type="text" id="password" option="hidden" enable="!eq(-1,)" default=""/>
     </category>
-    <category label="32020">
-        <setting label="32021" type="text" id="maxvideos" default="20"/>
+    <category label="32200">
+        <setting label="32222" type="bool" id="autolive" default="false"/>
+        <setting type="sep"/>
+        <setting label="32221" type="text" id="maxvideos" default="20"/>
+        <setting label="32223" type="text" id="cachesec" default="900"/>
+    </category>
+    <category label="32300">
+        <setting label="32301" type="action" action="RunScript($CWD/resources/lib/clearCache.py)"/>
     </category>
 </settings>

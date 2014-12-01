@@ -4,9 +4,20 @@
 <!-- Report language file syntax bugs at: http://trac.xbmc.org/ -->
 
 <strings>
-    <string id="32010">HKTV Login</string>
-    <string id="32011">Username</string>
-    <string id="32012">Password</string>
-    <string id="32020">General</string>
-    <string id="32021">Max Num of Video Listings</string>
+    <string id="32100">HKTV Login</string>
+    <string id="32111">Email</string>
+    <string id="32112">Password</string>
+    <string id="32200">General</string>
+    <string id="32221">Max Num of Video Listings</string>
+    <string id="32222">Auto-start Live Channel</string>
+    <string id="32223">Video Listings Cache Timeout (seconds)</string>
+    <string id="32300">Others</string>
+    <string id="32301">Clear cache files</string>
+
+    <string id="1000">Auto-starting Live Channel...</string>
+    <string id="1010">Latest</string>
+    <string id="1020">All Programs</string>
+
+    <string id="9000">Error: Unable to login HKTV</string>
+    <string id="9010">Error: Failed to process cookies</string>
 </strings>

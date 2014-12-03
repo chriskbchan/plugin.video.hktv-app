@@ -20,7 +20,9 @@ autoLive = addon.getSetting('autolive')
 cacheSec = int(addon.getSetting('cachesec'))
 __addonname__ = addon.getAddonInfo('name')
 __addonicon__ = addon.getAddonInfo('icon')
+__addonpath__ = addon.getAddonInfo('path')
 __addonprofile__ = addon.getAddonInfo('profile')
+__addonversion__ = addon.getAddonInfo('version')
 
 # URLs
 loginURL = 'https://www.hktvmall.com/hktv/zh/j_spring_security_check'
@@ -113,12 +115,15 @@ def cacheLoad(fn):
 def login(username=None, password=None):
     global cj
 
+    log('user length: ' + str(username.__len__()))
+    log('pass length: ' + str(password.__len__()))
     try:
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         req = urllib2.Request(loginURL)
         payload = { 'j_username' : username, 'j_password' : password  }
         resp = opener.open(req, urllib.urlencode(payload))
 
+        log('Save cookie: ' + COOKIE)
         cj.save(COOKIE, ignore_discard=True)
     except:
         popup(addon.getLocalizedString(9010))
@@ -277,12 +282,15 @@ progList = []
 
 cj = cookielib.LWPCookieJar()
 USERDATAPATH = xbmc.translatePath(__addonprofile__)
+if not xbmcvfs.exists(USERDATAPATH):
+     xbmcvfs.mkdir(USERDATAPATH)
 COOKIE = os.path.join(USERDATAPATH, 'cookie.txt')
 FEATURE_CACHE = os.path.join(USERDATAPATH, 'feature.json')
 PROGRAM_CACHE = os.path.join(USERDATAPATH, 'program.json')
 
 
 # Start
+log('### Start HKTV App version ' + __addonversion__)
 baseURL = sys.argv[0]
 addonHandle = int(sys.argv[1])
 
@@ -290,22 +298,25 @@ xbmcplugin.setContent(addonHandle, 'tvshows')
 
 # Load Cookies
 try:
+    log('Load cookie: ' + COOKIE)
     cj.load(COOKIE, ignore_discard=True)
 except Exception as e:
     log('Error loading '+ COOKIE +', err='+ str(e))
 
 parse_argv()
 
-log('Mode: '+str(mode))
-log('args[uid,tok,expy,pvid,pgid] = '+ ','.join([uid,tok,expy,pvid,pgid]))
+log('Mode: '+ str(mode) +', args[uid,tok,expy,pvid,pgid] = '+ ','.join([uid,tok,expy,pvid,pgid]))
+log('Addon Profile: '+ __addonprofile__)
 if mode == None:
 
     # Login
     if uid == '1':
         login(hktvUser, hktvPass)
         getToken()
-        if uid == '1':
+        if uid == '1' and hktvUser:
             popup(addon.getLocalizedString(9000))
+        elif not hktvUser:
+            popup(addon.getLocalizedString(8000))
         log('User ID: '+ uid)
 
     # Retrieve Playlist

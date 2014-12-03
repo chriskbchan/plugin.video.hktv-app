@@ -15,8 +15,10 @@
     <string id="32301">Clear cache files</string>
 
     <string id="1000">Auto-starting Live Channel...</string>
-    <string id="1010">Latest</string>
+    <string id="1010">Featured</string>
     <string id="1020">All Programs</string>
+
+    <string id="8000">Please setup HKTV Login to watch VOC channels</string>
 
     <string id="9000">Error: Unable to login HKTV</string>
     <string id="9010">Error: Failed to process cookies</string>

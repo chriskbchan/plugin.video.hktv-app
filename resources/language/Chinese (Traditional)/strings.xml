@@ -15,8 +15,10 @@
     <string id="32301">清除暫存檔案</string>
 
     <string id="1000">直播頻道 自動開始中...</string>
-    <string id="1010">最近</string>
+    <string id="1010">精選節目</string>
     <string id="1020">所有節目</string>
+
+    <string id="8000">請輸入 HKTV 用戶及密碼觀看點播內容</string>
 
     <string id="9000">錯誤：未能登入HKTV</string>
     <string id="9010">錯誤：未能處理cookies</string>

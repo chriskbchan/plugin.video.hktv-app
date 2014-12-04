@@ -1,3 +1,7 @@
+v0.1.4
+- add required minimum python api v2.1.0
+- minor code optimization
+
 v0.1.3
 - add popup for user and password setup
 - modify access to userdata path for storing cookies and cache

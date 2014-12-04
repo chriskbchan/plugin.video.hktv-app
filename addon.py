@@ -8,9 +8,6 @@ import os, time, sys
 
 UTF8 = 'utf-8'
 
-#reload(sys)
-#sys.setdefaultencoding(UTF8)
-
 # Init Addon
 addon = xbmcaddon.Addon()
 hktvUser = addon.getSetting('username')
@@ -152,7 +149,7 @@ def flattenDramaInfo(dInfo, progID=0):
         'pgid'     : str(progID),
         'vid'      : dInfo['video_id'],
         'pvid'     : dInfo['video_id'],
-        'title'    : dInfo['title'],
+        'title'    : dInfo['title'].encode(UTF8),
         'thumbnail': dInfo['thumbnail'],
         'duration' : dInfo['duration']
       })
@@ -165,7 +162,7 @@ def flattenDramaInfo(dInfo, progID=0):
           'pgid'     : str(progID),
           'vid'      : dChildInfo[c]['video_id'],
           'pvid'     : parentVID,
-          'title'    : dChildInfo[c]['title'],
+          'title'    : dChildInfo[c]['title'].encode(UTF8),
           'thumbnail': dChildInfo[c]['thumbnail'],
           'duration' : dChildInfo[c]['duration']
         })
@@ -202,7 +199,7 @@ def getAllPlaylist(videoLim=20, clearCache=False):
             'pgid'     : liveInfo['video_id'],
             'vid'      : liveInfo['video_id'],
             'pvid'     : liveInfo['video_id'],
-            'title'    : liveInfo['title'],
+            'title'    : liveInfo['title'].encode(UTF8),
             'thumbnail': liveInfo['thumbnail'],
             'duration' : liveInfo['duration']
           })
@@ -235,7 +232,7 @@ def getAllPlaylist(videoLim=20, clearCache=False):
                   'v_level'  : progInfo[p]['video_level'],
                   'pgid'     : progInfo[p]['video_id'],
                   'vid'      : progInfo[p]['video_id'],
-                  'title'    : progInfo[p]['title'],
+                  'title'    : progInfo[p]['title'].encode(UTF8),
                   'thumbnail': progInfo[p]['thumbnail']
                 })
             dramaInfo = progInfo[p]['child_nodes']
@@ -272,6 +269,22 @@ def getVideoPlaylist(vid):
     pList = json.loads(resp.read())
     
     return pList
+
+
+def createListItem(title, thumbnail, url, duration, desc, playable, folder):
+    li = xbmcgui.ListItem(title, iconImage=__addonicon__, thumbnailImage=thumbnail)
+    li.setInfo(type='video', infoLabels={ 'Title': title })
+    li.setInfo(type='video', infoLabels={ 'Plot': desc })
+    li.setProperty('IsPlayable', playable)
+    li.setProperty('fanart_image', thumbnail)
+
+    if not folder:
+        li.addStreamInfo('video', { 'duration': duration })
+
+    xbmcplugin.addDirectoryItem(handle=addonHandle, url=url, listitem=li, isFolder=folder)
+
+    return li
+
 
 ###
 
@@ -322,42 +335,39 @@ if mode == None:
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
 
-    featureSt = False
+    defaultThumbnail = ''
     
     # Generate Playlist
-    # Live & Feature
-    for i in range(0, videoList.__len__()):
+    # Live
+    liveURL = None
+    liveItem = None
+    for i in range (0, videoList.__len__()):
         v = videoList[i]
- 
         if v['category'] == 'LIVE':
             pList = getVideoPlaylist(int(v['vid']))
-            playURL = pList['m3u8']
-            lv = xbmcgui.ListItem(v['title'], iconImage=__addonicon__, thumbnailImage=v['thumbnail'])
-            lv.addStreamInfo('video', { 'duration': v['duration'] })
-            lv.setProperty('IsPlayable', 'true')
-            lv.setProperty('fanart_image', v['thumbnail'])
-            xbmcplugin.addDirectoryItem(handle=addonHandle, url=playURL, listitem=lv, isFolder=False)
-        elif v['category'] == 'DRAMA' and v['v_level'] == '1':  # Episode Parent
-            if not featureSt:
-                featureSt = True
-                sep = xbmcgui.ListItem('--- '+addon.getLocalizedString(1010)+' ---')
-                xbmcplugin.addDirectoryItem(handle=addonHandle, url=baseURL, listitem=sep, isFolder=False)
+            liveURL = pList['m3u8']
+            defaultThumbnail = v['thumbnail']    # for undefined thumbnail
+            liveItem = createListItem(v['title'], v['thumbnail'], liveURL, v['duration'], '', playable='true', folder=False)
 
+    sepText = '--- '+addon.getLocalizedString(1010)+' ---'
+    createListItem(sepText, defaultThumbnail, baseURL , '0', '', playable='false', folder=False)
+
+    # Feature
+    for i in range (0, videoList.__len__()):
+        v = videoList[i]
+        if v['category'] == 'DRAMA' and v['v_level'] == '1':  # Episode Parent
             payload = { 'mode' : v['v_level'],
                         'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['pvid']),
                         'pgid' : str(v['pgid']) }
-            url = baseURL +'?'+ urllib.urlencode(payload)
-            log('Episode: pvid='+v['pvid']+', vid='+v['vid']+', url='+url)
-            li = xbmcgui.ListItem(v['title'], iconImage=__addonicon__, thumbnailImage=v['thumbnail'])
-            li.setProperty('fanart_image', v['thumbnail'])
-            li.addStreamInfo('video', { 'duration': v['duration'] })
+            playURL = baseURL +'?'+ urllib.urlencode(payload)
+            log('Episode: pvid='+v['pvid']+', vid='+v['vid']+', playURL='+playURL)
             #vd = getVideoDetail(int(v['vid']))
             #if 'synopsis' in vd:
-            #    li.setInfo('video', { 'plot': vd['synopsis'] })
-            xbmcplugin.addDirectoryItem(handle=addonHandle, url=url, listitem=li, isFolder=True)
+            #    desc = vd['synopsis']
+            createListItem(v['title'], v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
 
-    sep = xbmcgui.ListItem('--- '+addon.getLocalizedString(1020)+' ---')
-    xbmcplugin.addDirectoryItem(handle=addonHandle, url=baseURL, listitem=sep, isFolder=False)
+    sepText = '--- '+addon.getLocalizedString(1020)+' ---'
+    createListItem(sepText, defaultThumbnail, baseURL , '0', '', playable='false', folder=False)
 
     # Program
     for i in range (0, progList.__len__()):
@@ -365,22 +375,19 @@ if mode == None:
         if p['category'] == 'DRAMA' and p['v_level'] == '2':  # Program Parent
             payload = { 'mode' : p['v_level'],
                         'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pgid' : str(p['pgid']) }
-            url = baseURL +'?'+ urllib.urlencode(payload)
-            log('Program: pgid='+p['pgid']+', vid='+p['vid']+', url='+url)
-            li = xbmcgui.ListItem(p['title'], iconImage=__addonicon__, thumbnailImage=p['thumbnail'])
-            li.setProperty('fanart_image', p['thumbnail'])
+            playURL = baseURL +'?'+ urllib.urlencode(payload)
+            log('Program: pgid='+p['pgid']+', vid='+p['vid']+', playURL='+playURL)
             #pd = getVideoDetail(int(p['vid']))
             #if 'synopsis' in pd:
-            #    li.setInfo('video', { 'plot': pd['synopsis'] })
-            #    li.addStreamInfo('video', { 'duration': pd['duration'] })
-            xbmcplugin.addDirectoryItem(handle=addonHandle, url=url, listitem=li, isFolder=True)
+            #    desc = pd['synopsis']
+            createListItem(p['title'], p['thumbnail'], playURL, '0', '', playable='false', folder=True)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
     log('Auto Live: '+ autoLive)
-    if autoLive == 'true':
+    if autoLive == 'true' and liveURL:
         popup(addon.getLocalizedString(1000))
-        xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playURL, lv)
+        xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(liveURL, liveItem)
 
 
 elif mode == 1:
@@ -393,7 +400,7 @@ elif mode == 1:
     dPlaylist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     dPlaylist.clear()
 
-    for i in range(0, videoList.__len__()):
+    for i in range (0, videoList.__len__()):
         v = videoList[i]
         if v['category'] == 'DRAMA' and v['pvid'] == pvid:
             if v['v_level'] == '1':
@@ -423,15 +430,12 @@ elif mode == 2:
                 payload = { 'mode' : str(mode + int(v['v_level'])),
                             'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['pvid']),
                             'pgid' : str(v['pgid']) }
-                url = baseURL +'?'+ urllib.urlencode(payload)
-                log('Episode: pvid='+v['pvid']+', vid='+v['vid']+', url='+url)
-                li = xbmcgui.ListItem(v['title'], iconImage=__addonicon__, thumbnailImage=v['thumbnail'])
-                li.setProperty('fanart_image', v['thumbnail'])
-                li.addStreamInfo('video', { 'duration': v['duration'] })
+                playURL = baseURL +'?'+ urllib.urlencode(payload)
+                log('Program: pgid='+v['pgid']+', vid='+v['vid']+', playURL='+playURL)
                 #vd = getVideoDetail(int(v['vid']))
                 #if 'synopsis' in vd:
-                #    li.setInfo('video', { 'plot': vd['synopsis'] })
-                xbmcplugin.addDirectoryItem(handle=addonHandle, url=url, listitem=li, isFolder=True)
+                #    desc = vd['synopsis']
+                createListItem(v['title'], v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
@@ -445,7 +449,7 @@ elif mode == 3:
     dPlaylist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     dPlaylist.clear()
 
-    for i in range(0, allList.__len__()):
+    for i in range (0, allList.__len__()):
         v = allList[i]
         if v['category'] == 'DRAMA' and v['pvid'] == pvid:
             if v['v_level'] == '1':

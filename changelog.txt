@@ -1,3 +1,6 @@
+v0.2.1
+- minor bug fix
+
 v0.2.0
 - option to show EPG
 - option to show Featured Programs

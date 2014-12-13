@@ -554,6 +554,9 @@ elif mode == 3:
                     for ad in range(adInfo.__len__()):
                         if 'media' in adInfo[ad]:
                            ai = xbmcgui.ListItem(v['title'], thumbnailImage=v['thumbnail'])
+                           adInfoJson = json.dumps(adInfo[ad])
+                           #log(xbmc.LOGDEBUG, 'adInfoJson:'+ str(dIndex) +'-'+ adInfoJson)
+                           ai.setInfo(type='video', infoLabels={ 'Plot': adInfoJson })      # plot as metadata
                            mediaURL = adInfo[ad]['media']
                            dPlaylist.add(url=mediaURL, listitem=ai, index=dIndex)
                            log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ mediaURL)

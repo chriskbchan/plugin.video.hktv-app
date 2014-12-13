@@ -1,3 +1,11 @@
+v0.2.0
+- option to show EPG
+- option to show Featured Programs
+- option to show All Programs
+- better error handling
+- minor menu layout changes
+- support Ad impression and tracking
+
 v0.1.4
 - add required minimum python api v2.1.0
 - minor code optimization

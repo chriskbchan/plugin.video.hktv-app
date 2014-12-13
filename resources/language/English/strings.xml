@@ -11,15 +11,24 @@
     <string id="32221">Max Num of Video Listings</string>
     <string id="32222">Auto-start Live Channel</string>
     <string id="32223">Video Listings Cache Timeout (seconds)</string>
+    <string id="32224">Show Featured Programs</string>
+    <string id="32225">Show All Programs</string>
+    <string id="32226">Show EPG</string>
     <string id="32300">Others</string>
     <string id="32301">Clear cache files</string>
 
     <string id="1000">Auto-starting Live Channel...</string>
     <string id="1010">Featured</string>
+    <string id="1011">Featured</string>
     <string id="1020">All Programs</string>
+    <string id="1030">EPG</string>
+    <string id="1040">Today</string>
+    <string id="1041">Tomorrow</string>
+    <string id="1042">D.A.T.</string>
 
     <string id="8000">Please setup HKTV Login to watch VOD channels</string>
 
     <string id="9000">Error: Unable to login HKTV</string>
     <string id="9010">Error: Failed to process cookies</string>
+    <string id="9020">Error: Failed to get video link</string>
 </strings>

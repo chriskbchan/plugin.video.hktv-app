@@ -7,6 +7,10 @@
     <category label="32200">
         <setting label="32222" type="bool" id="autolive" default="false"/>
         <setting type="sep"/>
+        <setting label="32224" type="bool" id="showfeat" default="true"/>
+        <setting label="32225" type="bool" id="showprog" default="true"/>
+        <setting label="32226" type="bool" id="showepg" default="true"/>
+        <setting type="sep"/>
         <setting label="32221" type="text" id="maxvideos" default="20"/>
         <setting label="32223" type="text" id="cachesec" default="900"/>
     </category>

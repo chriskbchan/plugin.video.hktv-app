@@ -13,6 +13,7 @@ def goURL(url):
     try:
         resp = urllib2.urlopen(url)
         log(xbmc.LOGDEBUG, '[%s] HTTP status code = %s' % (TRACKER, resp.getcode()))
+        return
     except Exception as e:
         log(xbmc.LOGERROR, '[%s] goURL err=%s' % (TRACKER, str(e)))
         return
@@ -44,9 +45,11 @@ class adsTimer(threading.Thread):
                         log(xbmc.LOGDEBUG, '[%s] [%s] interval %d - tracking - %s' % (TRACKER, self.getName(), i, tkList[i][t]))
                         goURL(tkList[i][t])
             sCount += 1
-            self._stopevent.wait(self._sleepperiod)
+            if sCount < self.timer:
+                self._stopevent.wait(self._sleepperiod)
 
         log(xbmc.LOGDEBUG, '[%s] [%s] timer completed' % (TRACKER, self.getName()))
+        self.join()
 
     def join(self, timeout=None):
         log(xbmc.LOGDEBUG, '[%s] [%s] timer stopping' % (TRACKER, self.getName()))
@@ -58,6 +61,7 @@ class hktvTracker(xbmc.Player):
 
     def __init__(self, *args, **kwargs):
         xbmc.Player.__init__(self)
+        self.playing = False
         self.adTrack = None
         self.url = ''
         self.playTime = 0
@@ -89,19 +93,23 @@ class hktvTracker(xbmc.Player):
                         if tkList:
                             self.adTrack = adsTimer(self.playTime, tkList)
                             self.adTrack.start()
+                self.playing = True
+                return
             except Exception as e:
                 log(xbmc.LOGERROR, '[%s] onPlayBackStarted err=%s' % (TRACKER, str(e)))
                 return
 
     def onPlayBackStopped(self):
-        xbmc.sleep(100)
         try:
             log(xbmc.LOGDEBUG, '[%s] stopping %s' % (TRACKER, self.url))
             self.adTrack.join()
+            return
         except Exception as e:
             log(xbmc.LOGERROR, '[%s] onPlayBackStopped err=%s' % (TRACKER, str(e)))
             return
 
+
+# Starting tracker
 
 log(xbmc.LOGINFO, '[%s] Loading HKTV Tracker' % TRACKER)
 

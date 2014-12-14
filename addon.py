@@ -285,6 +285,7 @@ def parseAds(xml):
 def getAds(muid, uid, ads_cat, tok, vid, vn, vt):
     global cj
 
+    ads = ''
     try:
         ads_list = ','.join(ads_cat)
         ads_list = ads_list.join(['{','}'])
@@ -305,11 +306,10 @@ def getAds(muid, uid, ads_cat, tok, vid, vn, vt):
         #log(xbmc.LOGDEBUG, 'mXML:%s' % (mXML))
 
         ads = parseAds(mXML)
-
+        return ads
     except Exception as e:
         log(xbmc.LOGERROR, 'Error loading Ads, err='+ str(e))
-
-    return ads
+        return ads
 
 
 def createListItem(title, thumbnail, url, duration, desc, playable, folder):
@@ -583,14 +583,14 @@ elif mode == 10:
 
     log(xbmc.LOGINFO, 'Selected EPG')
 
-    today = datetime.date.today()
+    today = datetime.datetime.today().replace(hour=0,minute=0,second=0,microsecond=0)
     tmw   = today + datetime.timedelta(days=1)
     dat   = today + datetime.timedelta(days=2)
     datt  = today + datetime.timedelta(days=3)
-    t0  = int(today.strftime('%s')) + 21600
-    t1  = int(tmw.strftime('%s'))
-    t2  = int(dat.strftime('%s'))
-    t3  = int(datt.strftime('%s'))
+    t0  = secondSinceEpoch(today) + 21600
+    t1  = secondSinceEpoch(tmw)
+    t2  = secondSinceEpoch(dat)
+    t3  = secondSinceEpoch(datt)
     t0Text = addon.getLocalizedString(1040)
     t1Text = addon.getLocalizedString(1041)
     t2Text = addon.getLocalizedString(1042)

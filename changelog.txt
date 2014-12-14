@@ -1,3 +1,7 @@
+v0.2.2
+- fix EPG for python 2.6
+- other minor bug fix
+
 v0.2.1
 - minor bug fix
 

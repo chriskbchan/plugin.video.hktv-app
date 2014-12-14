@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import xbmc, xbmcaddon, xbmcvfs
-import os, time, sys, json
+import os, time, datetime, sys, json
 
 UTF8 = 'utf-8'
 
@@ -79,4 +79,14 @@ def xbmcJsonRequest(params):
     except KeyError:
         log(xbmc.LOGERROR, '[%s] %s' % (params['method'], resp['error']['message']))
         return None
+
+
+def secondSinceEpoch(dtime):
+    epoch = datetime.datetime(1970,1,1,8,0,0)       # assume HK GMT+8
+    td = dtime - epoch
+    if sys.version_info >= (2, 7):
+       t = td.total_seconds()
+    else:
+       t = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
+    return int(t)
 

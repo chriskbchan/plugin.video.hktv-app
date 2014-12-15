@@ -481,6 +481,7 @@ elif mode == 1:
                            adInfoJson = json.dumps(adInfo[ad])
                            #log(xbmc.LOGDEBUG, 'adInfoJson:'+ str(dIndex) +'-'+ adInfoJson)
                            ai.setInfo(type='video', infoLabels={ 'Plot': adInfoJson })      # plot as metadata
+                           ai.setInfo(type='video', infoLabels={ 'PlotOutline': 'ADS' })
                            mediaURL = adInfo[ad]['media']
                            dPlaylist.add(url=mediaURL, listitem=ai, index=dIndex)
                            log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ mediaURL)
@@ -490,6 +491,7 @@ elif mode == 1:
                 li.addStreamInfo('video', { 'duration': v['duration'] })
                 if 'm3u8' in pList:
                     playURL = pList['m3u8']
+                    li.setInfo(type='video', infoLabels={ 'PlotOutline': v['category'] })
                     dPlaylist.add(url=playURL, listitem=li, index=dIndex)
                     log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
                     dIndex += 1
@@ -557,6 +559,7 @@ elif mode == 3:
                            adInfoJson = json.dumps(adInfo[ad])
                            #log(xbmc.LOGDEBUG, 'adInfoJson:'+ str(dIndex) +'-'+ adInfoJson)
                            ai.setInfo(type='video', infoLabels={ 'Plot': adInfoJson })      # plot as metadata
+                           ai.setInfo(type='video', infoLabels={ 'PlotOutline': 'ADS' })
                            mediaURL = adInfo[ad]['media']
                            dPlaylist.add(url=mediaURL, listitem=ai, index=dIndex)
                            log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ mediaURL)
@@ -566,6 +569,7 @@ elif mode == 3:
                 li.addStreamInfo('video', { 'duration': v['duration'] })
                 if 'm3u8' in pList:
                     playURL = pList['m3u8']
+                    li.setInfo(type='video', infoLabels={ 'PlotOutline': v['category'] })
                     dPlaylist.add(url=playURL, listitem=li, index=dIndex)
                     log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
                     dIndex += 1

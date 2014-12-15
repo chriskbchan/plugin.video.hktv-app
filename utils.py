@@ -6,12 +6,13 @@ import os, time, datetime, sys, json
 UTF8 = 'utf-8'
 
 addon = xbmcaddon.Addon()
+__addonid__   = addon.getAddonInfo('id')
 __addonname__ = addon.getAddonInfo('name')
 cacheSec = int(addon.getSetting('cachesec'))
 
 
 def log(level, txt):
-    message = '%s: %s' % (__addonname__, txt.encode('ascii', 'ignore'))
+    message = '[%s]: %s' % (__addonid__, txt.encode('ascii', 'ignore'))
     xbmc.log(msg=message, level=level)
 
 

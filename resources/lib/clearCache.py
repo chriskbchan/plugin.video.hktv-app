@@ -1,4 +1,8 @@
+# -*- coding: utf-8 -*-
+
 import os, xbmc, xbmcaddon, xbmcvfs
+
+UTF8 = 'utf-8'
 
 def cacheClear(fn):
     if xbmcvfs.exists(fn):
@@ -6,6 +10,8 @@ def cacheClear(fn):
 
 
 addon = xbmcaddon.Addon(id='plugin.video.hktv-app')
+__addonname__    = addon.getAddonInfo('name')
+__addonicon__    = addon.getAddonInfo('icon')
 __addonprofile__ = addon.getAddonInfo('profile')
 
 USERDATAPATH = xbmc.translatePath(__addonprofile__)
@@ -18,3 +24,6 @@ cacheClear(COOKIE)
 cacheClear(FEATURE_CACHE)
 cacheClear(PROGRAM_CACHE)
 cacheClear(EPG_CACHE)
+
+txt = addon.getLocalizedString(32302)
+xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (__addonname__, txt.encode(UTF8), 5000, __addonicon__))

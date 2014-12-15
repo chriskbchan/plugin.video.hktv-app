@@ -49,7 +49,6 @@ class adsTimer(threading.Thread):
                 self._stopevent.wait(self._sleepperiod)
 
         log(xbmc.LOGDEBUG, '[%s] [%s] timer completed' % (TRACKER, self.getName()))
-        self.join()
 
     def join(self, timeout=None):
         log(xbmc.LOGDEBUG, '[%s] [%s] timer stopping' % (TRACKER, self.getName()))
@@ -74,7 +73,9 @@ class hktvTracker(xbmc.Player):
                 self.playTime = self.getTotalTime()
                 log(xbmc.LOGDEBUG, '[%s] playing - %s' % (TRACKER, self.url))
                 adInfoJson = xbmc.getInfoLabel('VideoPlayer.Plot')
+                videoType = xbmc.getInfoLabel('VideoPlayer.PlotOutline')
                 log(xbmc.LOGDEBUG, '[%s] adInfoJson=%s' % (TRACKER, adInfoJson))
+                log(xbmc.LOGDEBUG, '[%s] videoType=%s' % (TRACKER, videoType))
                 if adInfoJson:
                     adInfo = json.loads(adInfoJson)
                     # get Ad info
@@ -89,7 +90,8 @@ class hktvTracker(xbmc.Player):
                     if 'track' in adInfo:
                         tkList = adInfo['track']
                     # tracker
-                    if self.playTime > 1 and self.playTime < 60:
+                    #if self.playTime > 1 and self.playTime < 60:
+                    if videoType == 'ADS':
                         if tkList:
                             self.adTrack = adsTimer(self.playTime, tkList)
                             self.adTrack.start()
@@ -98,6 +100,15 @@ class hktvTracker(xbmc.Player):
             except Exception as e:
                 log(xbmc.LOGERROR, '[%s] onPlayBackStarted err=%s' % (TRACKER, str(e)))
                 return
+
+    def onPlayBackEnded(self):
+        try:
+            log(xbmc.LOGDEBUG, '[%s] ended %s' % (TRACKER, self.url))
+            self.adTrack.join()
+            return
+        except Exception as e:
+            log(xbmc.LOGERROR, '[%s] onPlayBackEnded err=%s' % (TRACKER, str(e)))
+            return
 
     def onPlayBackStopped(self):
         try:

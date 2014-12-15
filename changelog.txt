@@ -1,3 +1,7 @@
+v0.2.3
+- minor enhancement in Ad tracking
+- add dialog for cache clearing
+
 v0.2.2
 - fix EPG for python 2.6
 - other minor bug fix

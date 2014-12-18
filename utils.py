@@ -8,6 +8,7 @@ UTF8 = 'utf-8'
 addon = xbmcaddon.Addon()
 __addonid__   = addon.getAddonInfo('id')
 __addonname__ = addon.getAddonInfo('name')
+__addonicon__ = addon.getAddonInfo('icon')
 cacheSec = int(addon.getSetting('cachesec'))
 
 

@@ -14,11 +14,14 @@
     <string id="32224">Show Featured Programs</string>
     <string id="32225">Show All Programs</string>
     <string id="32226">Show EPG</string>
+    <string id="32227">Show Shopping Channel</string>
+    <string id="32228">Max Num of Shopping Listings</string>
     <string id="32300">Others</string>
     <string id="32301">Clear cache files</string>
     <string id="32302">Cache cleared</string>
 
     <string id="1000">Auto-starting Live Channel...</string>
+    <string id="1005">Shopping Channel</string>
     <string id="1010">Featured</string>
     <string id="1011">Featured</string>
     <string id="1020">All Programs</string>
@@ -26,6 +29,7 @@
     <string id="1040">Today</string>
     <string id="1041">Tomorrow</string>
     <string id="1042">D.A.T.</string>
+    <string id="1050">On Air</string>
 
     <string id="8000">Please setup HKTV Login to watch VOD channels</string>
 

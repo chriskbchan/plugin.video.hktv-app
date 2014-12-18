@@ -14,11 +14,14 @@
     <string id="32224">顯示精選節目列表</string>
     <string id="32225">顯示所有節目列表</string>
     <string id="32226">顯示節目表</string>
+    <string id="32227">顯示購物頻道</string>
+    <string id="32228">購物列表數目</string>
     <string id="32300">其他</string>
     <string id="32301">清除暫存檔案</string>
     <string id="32302">暫存檔案已清除</string>
 
     <string id="1000">直播頻道 自動開始中...</string>
+    <string id="1005">購物頻道</string>
     <string id="1010">精選節目</string>
     <string id="1011">精選</string>
     <string id="1020">所有節目</string>
@@ -26,6 +29,7 @@
     <string id="1040">今日</string>
     <string id="1041">明日</string>
     <string id="1042">後日</string>
+    <string id="1050">播放中</string>
 
     <string id="8000">請輸入 HKTV 用戶及密碼觀看點播內容</string>
 

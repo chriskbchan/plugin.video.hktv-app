@@ -4,7 +4,8 @@ plugin.video.hktv-app
 Unofficial XBMC/KODI HKTV Addon
  - Live Channel
  - VOD Channels (HKTV login required)
- - Get EPG
+ - Shopping Channel
+ - EPG Support
 
 Note
  - Streaming quality is controlled by HKTV

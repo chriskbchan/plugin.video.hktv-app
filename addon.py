@@ -14,8 +14,10 @@ addon = xbmcaddon.Addon()
 hktvUser = addon.getSetting('username')
 hktvPass = addon.getSetting('password')
 videoLim = addon.getSetting('maxvideos')
+vshopLim = addon.getSetting('maxshops')
 autoLive = addon.getSetting('autolive')
 showEpg  = addon.getSetting('showepg')
+showShop = addon.getSetting('showshop')
 showFeat = addon.getSetting('showfeat')
 showProg = addon.getSetting('showprog')
 #cacheSec = int(addon.getSetting('cachesec'))
@@ -30,6 +32,7 @@ loginURL = 'https://www.hktvmall.com/hktv/zh/j_spring_security_check'
 tokenURL = 'http://www.hktvmall.com/ott/token'
 fListURL = 'http://ott-www.hktvmall.com/api/lists/getFeature'
 pListURL = 'http://ott-www.hktvmall.com/api/lists/getProgram'
+sListURL = 'http://ott-www.hktvmall.com/api/lists/getProduct'
 tvEpgURL = 'http://ott-www.hktvmall.com/api/lists/getEpg'
 plReqURL = 'http://ott-www.hktvmall.com/api/playlist/request'
 vInfoURL = 'http://ott-www.hktvmall.com/api/video/details'
@@ -91,7 +94,7 @@ def getToken():
     expy = token['expiry_date']
 
 
-def flattenDramaInfo(dInfo, progID=0):
+def flattenJsonInfo(dInfo, progID=0):
     dList = []
 
     dList.append(
@@ -140,7 +143,7 @@ def getEpg():
     return eJson
 
 
-def getAllPlaylist(videoLim=20, clearCache=False):
+def getAllPlaylist(lim=20, clearCache=False):
     global cj
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 
@@ -153,7 +156,7 @@ def getAllPlaylist(videoLim=20, clearCache=False):
     if cache is None:
         log(xbmc.LOGDEBUG, 'Feature list loading...')
         req = urllib2.Request(fListURL)
-        payload = { 'lim' : videoLim, 'ofs' : '0' }
+        payload = { 'lim' : lim, 'ofs' : '0' }
         resp = opener.open(req, urllib.urlencode(payload))
         fJson = json.loads(resp.read())
         cacheSave(FEATURE_CACHE, json.dumps(fJson))
@@ -177,7 +180,7 @@ def getAllPlaylist(videoLim=20, clearCache=False):
     if 'videos' in fJson:
         dramaInfo = fJson['videos']
         for d in range(dramaInfo.__len__()):
-            di = flattenDramaInfo(dramaInfo[d])
+            di = flattenJsonInfo(dramaInfo[d])
             for v in range(di.__len__()):
                 vList.append(di[v])
 
@@ -186,7 +189,7 @@ def getAllPlaylist(videoLim=20, clearCache=False):
     if cache is None:
         log(xbmc.LOGDEBUG, 'Program list loading...')
         req = urllib2.Request(pListURL)
-        payload = { 'lim' : videoLim, 'ofs' : '0' }
+        payload = { 'lim' : lim, 'ofs' : '0' }
         resp = opener.open(req, urllib.urlencode(payload))
         aJson = json.loads(resp.read())
         cacheSave(PROGRAM_CACHE, json.dumps(aJson))
@@ -207,11 +210,46 @@ def getAllPlaylist(videoLim=20, clearCache=False):
                 })
             dramaInfo = progInfo[p]['child_nodes']
             for p2 in range(dramaInfo.__len__()):
-                di = flattenDramaInfo(dramaInfo[p2], int(progInfo[p]['video_id']))
+                di = flattenJsonInfo(dramaInfo[p2], int(progInfo[p]['video_id']))
                 for v in range(di.__len__()):
                     aList.append(di[v])
 
     return (vList, pList, aList)
+
+
+def getShopPlaylist(lim=50, clearCache=False):
+    global cj
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
+    sList = []  # shopping video list
+
+    # Get shopping playlist
+    cache = cacheLoad(SHOPPING_CACHE)
+    if cache is None:
+        log(xbmc.LOGDEBUG, 'Shopping list loading...')
+        req = urllib2.Request(sListURL)
+        payload = { 'lim' : lim, 'ofs' : '0' }
+        resp = opener.open(req, urllib.urlencode(payload))
+        sJson = json.loads(resp.read())
+        cacheSave(SHOPPING_CACHE, json.dumps(sJson))
+    else:
+        log(xbmc.LOGDEBUG, 'Shopping list using cache')
+        sJson = json.loads(cache.decode(UTF8))
+
+    if 'videos' in sJson:
+        prodInfo = sJson['videos']
+        for p in range(prodInfo.__len__()):
+            sList.append(
+                { 'category' : prodInfo[p]['category'],
+                  'v_level'  : prodInfo[p]['video_level'],
+                  'pgid'     : prodInfo[p]['video_id'],
+                  'vid'      : prodInfo[p]['video_id'],
+                  'title'    : prodInfo[p]['title'].encode(UTF8),
+                  'thumbnail': prodInfo[p]['thumbnail'],
+                  'duration' : prodInfo[p]['duration']
+                })
+
+    return sList
 
 
 def getVideoDetail(vid):
@@ -277,7 +315,7 @@ def parseAds(xml):
             ads[idx]['track'] = tkList
 
     except Exception as e:
-        log(xbmc.LOGERROR, 'Error parsing Ads, err='+ str(e))
+        log(xbmc.LOGERROR, 'Error parsing Ads, err=%s' % str(e))
 
     return ads
 
@@ -308,7 +346,7 @@ def getAds(muid, uid, ads_cat, tok, vid, vn, vt):
         ads = parseAds(mXML)
         return ads
     except Exception as e:
-        log(xbmc.LOGERROR, 'Error loading Ads, err='+ str(e))
+        log(xbmc.LOGERROR, 'Error loading Ads, err=%s' % str(e))
         return ads
 
 
@@ -339,6 +377,7 @@ if not xbmcvfs.exists(USERDATAPATH):
 COOKIE = os.path.join(USERDATAPATH, 'cookie.txt')
 FEATURE_CACHE = os.path.join(USERDATAPATH, 'feature.json')
 PROGRAM_CACHE = os.path.join(USERDATAPATH, 'program.json')
+SHOPPING_CACHE = os.path.join(USERDATAPATH, 'shopping.json')
 EPG_CACHE = os.path.join(USERDATAPATH, 'epg.json')
 
 
@@ -351,10 +390,10 @@ xbmcplugin.setContent(addonHandle, 'tvshows')
 
 # Load Cookies
 try:
-    log(xbmc.LOGDEBUG, 'Load cookie: ' + COOKIE)
+    log(xbmc.LOGDEBUG, 'Load cookie: %s' % COOKIE)
     cj.load(COOKIE, ignore_discard=True)
 except Exception as e:
-    log(xbmc.LOGERROR, 'Error loading '+ COOKIE +', err='+ str(e))
+    log(xbmc.LOGERROR, 'Error loading %s, err=%s' % (COOKIE, str(e)))
 
 parse_argv()
 
@@ -390,11 +429,11 @@ if mode == None:
             pList = getVideoPlaylist(int(v['vid']))
             if 'm3u8' in pList:
                 liveURL = pList['m3u8']
-                liveTitle = '[COLOR %s]%s[/COLOR]' % ('lightgreen', v['title'])
+                liveTitle = '[COLOR %s]%s[/COLOR]' % ('red', v['title'])
                 defaultThumbnail = v['thumbnail']    # for undefined thumbnail
             else:
                 liveURL = baseURL
-                liveTitle = '[COLOR %s]%s[/COLOR]' % ('red', v['title'])
+                liveTitle = v['title']
                 failCount += 1
             liveItem = createListItem(liveTitle, v['thumbnail'], liveURL, v['duration'], '', playable='true', folder=False)
 
@@ -404,11 +443,15 @@ if mode == None:
         epgURL = baseURL +'?'+ urllib.urlencode(payload)
         createListItem(epgText, defaultThumbnail, epgURL , '0', epgText, playable='false', folder=True)
 
+    # Shopping
+    if showShop == 'true':
+        shopText = 'HKTV '+addon.getLocalizedString(1005)
+        payload = { 'mode' : '20', 'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy) }
+        shopURL = baseURL +'?'+ urllib.urlencode(payload)
+        createListItem(shopText, defaultThumbnail, shopURL , '0', shopText, playable='false', folder=True)
+
     # Feature
     if showFeat == 'true':
-        #sepText = '[B][COLOR white]--- %s ---[/COLOR][/B]' % (addon.getLocalizedString(1010))
-        #createListItem(sepText, defaultThumbnail, baseURL , '0', '', playable='false', folder=False)
-
         for i in range(videoList.__len__()):
             v = videoList[i]
             if v['category'] == 'DRAMA' and v['v_level'] == '1':  # Episode Parent
@@ -425,9 +468,6 @@ if mode == None:
 
     # Program
     if showProg == 'true':
-        #sepText = '[B][COLOR white]--- %s ---[/COLOR][/B]' % (addon.getLocalizedString(1020))
-        #createListItem(sepText, defaultThumbnail, baseURL , '0', '', playable='false', folder=False)
-
         for i in range(progList.__len__()):
             p = progList[i]
             if p['category'] == 'DRAMA' and p['v_level'] == '2':  # Program Parent
@@ -591,7 +631,7 @@ elif mode == 10:
     tmw   = today + datetime.timedelta(days=1)
     dat   = today + datetime.timedelta(days=2)
     datt  = today + datetime.timedelta(days=3)
-    t0  = secondSinceEpoch(today) + 21600
+    t0  = secondSinceEpoch(today)# + 21600
     t1  = secondSinceEpoch(tmw)
     t2  = secondSinceEpoch(dat)
     t3  = secondSinceEpoch(datt)
@@ -599,27 +639,93 @@ elif mode == 10:
     t1Text = addon.getLocalizedString(1041)
     t2Text = addon.getLocalizedString(1042)
     epgLineForm = '[COLOR %s][%s][/COLOR] [B]%s[/B] - %s'
+    epgLineLive = '%s [COLOR red](%s)[/COLOR]' % (epgLineForm, addon.getLocalizedString(1050))
 
-    epgJson = getEpg()
+    try:
+        epgJson = getEpg()
+        epgListEnrich = []
 
-    if 'epg' in epgJson:
-        epgList = epgJson['epg']
-        for e in epgList:
-            stTime = int(e['start_time'])
+        prevTime = 0
+        if 'epg' in epgJson:
+            epgList = epgJson['epg']
+            for e in epgList:
+                if prevTime == 0:
+                    prevTitle = e['title']
+                    prevTime  = int(e['start_time'])
+                else:
+                    showTime  = int(e['start_time'])
+                    # add previous show
+                    epgListEnrich.append({'start':prevTime, 'end':showTime, 'title':prevTitle})
+                    prevTitle = e['title']
+                    prevTime  = showTime
+    
+        now = int(time.time())
+        for e in epgListEnrich:
+            stTime = e['start']
+            enTime = e['end']
             eTime = datetime.datetime.fromtimestamp(stTime)
             if stTime <= t1 and stTime > t0:
-                epgLine = epgLineForm % ('orange' , t0Text, eTime.strftime('%H:%M'), e['title'])
-                createListItem(epgLine, '', baseURL , '0', '', playable='false', folder=False)
+                textColor = 'orange'
+                dayText = t0Text
             elif stTime <= t2 and stTime > t1:
-                epgLine = epgLineForm % ('green'  , t1Text, eTime.strftime('%H:%M'), e['title'])
-                createListItem(epgLine, '', baseURL , '0', '', playable='false', folder=False)
+                textColor = 'green'
+                dayText = t1Text
             elif stTime <= t3 and stTime > t2:
-                epgLine = epgLineForm % ('magenta', t2Text, eTime.strftime('%H:%M'), e['title'])
+                textColor = 'magenta'
+                dayText = t2Text
+            else:
+                textColor = dayText = ''
+            if textColor and dayText:
+                if now > stTime and now <= enTime:
+                    epgLine = epgLineLive % (textColor, dayText, eTime.strftime('%H:%M'), e['title'])
+                else:
+                    epgLine = epgLineForm % (textColor, dayText, eTime.strftime('%H:%M'), e['title'])
                 createListItem(epgLine, '', baseURL , '0', '', playable='false', folder=False)
+    except Exception as e:
+        log(xbmc.LOGERROR, 'EPG err=%s' % str(e))
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
     log(xbmc.LOGINFO, 'Finished EPG')
+
+elif mode == 20:
+
+    log(xbmc.LOGINFO, 'Selected Shopping List')
+
+    # Retrieve Playlist
+    shopList = getShopPlaylist(vshopLim)
+
+    for i in range(shopList.__len__()):
+        v = shopList[i]
+        if v['category'] == 'PRODUCT':
+            payload = { 'mode' : '21', 'muid' : muid,
+                        'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['vid']),
+                        'pgid' : str(v['vid']) }
+            playURL = baseURL +'?'+ urllib.urlencode(payload)
+            log(xbmc.LOGDEBUG, 'Shopping: vid='+v['vid']+', playURL='+playURL)
+            createListItem(v['title'], v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
+
+    xbmcplugin.endOfDirectory(handle=addonHandle)
+
+    log(xbmc.LOGINFO, 'Finished Shopping List')
+
+elif mode == 21:
+
+    log(xbmc.LOGINFO, 'Selected Shopping VID: ' + pvid)
+
+    pList = getVideoPlaylist(int(pvid))
+    if 'm3u8' in pList:
+        shopURL = pList['m3u8']
+        vd = getVideoDetail(int(pvid))
+        if 'title' in vd:
+            shopItem = createListItem(vd['title'], vd['thumbnail'], shopURL, vd['duration'], '', playable='true', folder=False)
+        else:
+            shopItem = createListItem('', '', shopURL, '', '', playable='true', folder=False)
+        xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(shopURL, shopItem)
+    else:
+        popup(addon.getLocalizedString(9020))
+
+    log(xbmc.LOGINFO, 'Finished Shopping VID: ' + pvid)
 
 #
 #   Do not go gentle into that good night,

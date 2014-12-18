@@ -1,3 +1,9 @@
+v0.2.4
+- new option to show Shopping Channel
+- change Live link to red
+- fixed script error of unable to view Live channel without user setup
+- minor enhancement in EPG
+
 v0.2.3
 - minor enhancement in Ad tracking
 - add dialog for cache clearing

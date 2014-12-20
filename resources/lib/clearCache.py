@@ -27,5 +27,5 @@ cacheClear(PROGRAM_CACHE)
 cacheClear(SHOPPING_CACHE)
 cacheClear(EPG_CACHE)
 
-txt = addon.getLocalizedString(32302)
+txt = addon.getLocalizedString(1060)
 xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (__addonname__, txt.encode(UTF8), 5000, __addonicon__))

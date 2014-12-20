@@ -1,3 +1,6 @@
+v0.2.5
+- add script to install / uninstall autoexec.py
+
 v0.2.4
 - new option to show Shopping Channel
 - change Live link to red

@@ -18,7 +18,8 @@
     <string id="32228">Max Num of Shopping Listings</string>
     <string id="32300">Others</string>
     <string id="32301">Clear cache files</string>
-    <string id="32302">Cache cleared</string>
+    <string id="32302">Install auto startup script</string>
+    <string id="32303">Uninstall auto startup script</string>
 
     <string id="1000">Auto-starting Live Channel...</string>
     <string id="1005">Shopping Channel</string>
@@ -30,10 +31,15 @@
     <string id="1041">Tomorrow</string>
     <string id="1042">D.A.T.</string>
     <string id="1050">On Air</string>
+    <string id="1060">Cache cleared</string>
+    <string id="1070">Auto startup script installed</string>
+    <string id="1071">Auto startup script uninstalled</string>
 
     <string id="8000">Please setup HKTV Login to watch VOD channels</string>
 
     <string id="9000">Error: Unable to login HKTV</string>
     <string id="9010">Error: Failed to process cookies</string>
     <string id="9020">Error: Failed to get video link</string>
+    <string id="9030">Error: Failed to install auto startup script</string>
+    <string id="9031">Error: Failed to uninstall auto startup script</string>
 </strings>

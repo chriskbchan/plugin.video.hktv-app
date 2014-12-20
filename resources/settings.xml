@@ -18,5 +18,8 @@
     </category>
     <category label="32300">
         <setting label="32301" type="action" action="RunScript($CWD/resources/lib/clearCache.py)"/>
+        <setting type="sep"/>
+        <setting label="32302" type="action" action="RunScript($CWD/resources/lib/installAutoexec.py)"/>
+        <setting label="32303" type="action" action="RunScript($CWD/resources/lib/uninstallAutoexec.py)"/>
     </category>
 </settings>

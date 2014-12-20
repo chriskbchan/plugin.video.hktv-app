@@ -18,7 +18,8 @@
     <string id="32228">購物列表數目</string>
     <string id="32300">其他</string>
     <string id="32301">清除暫存檔案</string>
-    <string id="32302">暫存檔案已清除</string>
+    <string id="32302">安裝自動啓始程序</string>
+    <string id="32303">解除自動啓始程序</string>
 
     <string id="1000">直播頻道 自動開始中...</string>
     <string id="1005">購物頻道</string>
@@ -30,10 +31,15 @@
     <string id="1041">明日</string>
     <string id="1042">後日</string>
     <string id="1050">播放中</string>
+    <string id="1060">暫存檔案已清除</string>
+    <string id="1070">已安裝自動啓始程序</string>
+    <string id="1071">已解除自動啓始程序</string>
 
     <string id="8000">請輸入 HKTV 用戶及密碼觀看點播內容</string>
 
     <string id="9000">錯誤：未能登入HKTV</string>
     <string id="9010">錯誤：未能處理cookies</string>
     <string id="9020">錯誤：未能索取影片連結</string>
+    <string id="9030">錯誤：未能安裝自動啓始程序</string>
+    <string id="9031">錯誤：未能解除自動啓始程序</string>
 </strings>

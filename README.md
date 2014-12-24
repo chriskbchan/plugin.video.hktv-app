@@ -10,7 +10,7 @@ Unofficial XBMC/KODI HKTV Addon
 
 Note
  - Streaming quality is controlled by HKTV
- - Please restart XBMC after installation or update
+ - Please restart XBMC/KODI after installation or update
 
 Disclaimer
  - This is an unofficial HKTV app, use at your own risk

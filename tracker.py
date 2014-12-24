@@ -9,13 +9,13 @@ TRACKER = 'hktvTracker'
 
 
 def goURL(url):
-    log(xbmc.LOGDEBUG, '[%s] Go URL %s' % (TRACKER, url))
+    log('[%s] Go URL %s' % (TRACKER, url))
     try:
         resp = urllib2.urlopen(url)
-        log(xbmc.LOGDEBUG, '[%s] HTTP status code = %s' % (TRACKER, resp.getcode()))
+        log('[%s] HTTP status code = %s' % (TRACKER, resp.getcode()))
         return
     except Exception as e:
-        log(xbmc.LOGERROR, '[%s] goURL err=%s' % (TRACKER, str(e)))
+        logerr('[%s] goURL err=%s' % (TRACKER, e))
         return
 
 
@@ -27,10 +27,10 @@ class adsTimer(threading.Thread):
         self._sleepperiod = 1.0
         self.timer = second
         self.trackers = trackers
-        log(xbmc.LOGDEBUG, '[%s] [%s] timer for %d sec' % (TRACKER, self.getName(), self.timer))
+        log('[%s] [%s] timer for %d sec' % (TRACKER, self.getName(), self.timer))
 
     def run(self):
-        log(xbmc.LOGDEBUG, '[%s] [%s] timer started' % (TRACKER, self.getName()))
+        log('[%s] [%s] timer started' % (TRACKER, self.getName()))
         sCount = 0
         intv = [ 0, self.timer / 4, self.timer / 2, self.timer / 4 * 3, self.timer ]
         tkList = map(list, zip(*self.trackers))
@@ -38,20 +38,20 @@ class adsTimer(threading.Thread):
         while not self._stopevent.isSet() and sCount <= self.timer:
             for i in range(intv.__len__()):
                 interval = int(intv[i])
-                #log(xbmc.LOGDEBUG, '[%s] [%s] i=%d, intv=%d, sCount=%s' % (TRACKER, self.getName(), i, intv[i], sCount))
+                #log('[%s] [%s] i=%d, intv=%d, sCount=%s' % (TRACKER, self.getName(), i, intv[i], sCount))
                 if sCount == interval:
-                    #log(xbmc.LOGDEBUG, '[%s] [%s] match interval' % (TRACKER, self.getName()))
+                    #log('[%s] [%s] match interval' % (TRACKER, self.getName()))
                     for t in range(tkList[i].__len__()):  # per trackers
-                        log(xbmc.LOGDEBUG, '[%s] [%s] interval %d - tracking - %s' % (TRACKER, self.getName(), i, tkList[i][t]))
+                        log('[%s] [%s] interval %d - tracking - %s' % (TRACKER, self.getName(), i, tkList[i][t]))
                         goURL(tkList[i][t])
             sCount += 1
             if sCount < self.timer:
                 self._stopevent.wait(self._sleepperiod)
 
-        log(xbmc.LOGDEBUG, '[%s] [%s] timer completed' % (TRACKER, self.getName()))
+        log('[%s] [%s] timer completed' % (TRACKER, self.getName()))
 
     def join(self, timeout=None):
-        log(xbmc.LOGDEBUG, '[%s] [%s] timer stopping' % (TRACKER, self.getName()))
+        log('[%s] [%s] timer stopping' % (TRACKER, self.getName()))
         self._stopevent.set()
         threading.Thread.join(self, timeout)
 
@@ -71,65 +71,70 @@ class hktvTracker(xbmc.Player):
             try:
                 self.url = self.getPlayingFile()
                 self.playTime = self.getTotalTime()
-                log(xbmc.LOGDEBUG, '[%s] playing - %s' % (TRACKER, self.url))
                 adInfoJson = xbmc.getInfoLabel('VideoPlayer.Plot')
                 videoType = xbmc.getInfoLabel('VideoPlayer.PlotOutline')
-                log(xbmc.LOGDEBUG, '[%s] adInfoJson=%s' % (TRACKER, adInfoJson))
-                log(xbmc.LOGDEBUG, '[%s] videoType=%s' % (TRACKER, videoType))
+                #log('[%s] adInfoJson=%s' % (TRACKER, adInfoJson))
+                #log('[%s] videoType=%s' % (TRACKER, videoType))
                 if adInfoJson:
                     adInfo = json.loads(adInfoJson)
-                    # get Ad info
-                    if 'imp' in adInfo:
-                        imList = adInfo['imp']
-                        for i in range(imList.__len__()):
-                            log(xbmc.LOGDEBUG, '[%s] impression=%s' % (TRACKER, imList[i]))
-                            goURL(imList[i])
-                    tkList = None
-                    #tkList = [ ['1A', '1B', '1C', '1D', '1E'],
-                    #           ['2A', '2B', '2C', '2D', '2E'] ]
                     if 'track' in adInfo:
-                        tkList = adInfo['track']
-                    # tracker
-                    #if self.playTime > 1 and self.playTime < 60:
-                    if videoType == 'ADS':
-                        if tkList:
-                            self.adTrack = adsTimer(self.playTime, tkList)
-                            self.adTrack.start()
-                self.playing = True
+                        log('[%s] playing - %s' % (TRACKER, self.url))
+                        # get Ad info
+                        if 'imp' in adInfo:
+                            imList = adInfo['imp']
+                            for i in range(imList.__len__()):
+                                log('[%s] impression=%s' % (TRACKER, imList[i]))
+                                goURL(imList[i])
+                        tkList = None
+                        #tkList = [ ['1A', '1B', '1C', '1D', '1E'],
+                        #           ['2A', '2B', '2C', '2D', '2E'] ]
+                        if 'track' in adInfo:
+                            tkList = adInfo['track']
+                        # tracker
+                        #if self.playTime > 1 and self.playTime < 60:
+                        if videoType == 'ADS':
+                            if tkList:
+                                self.adTrack = adsTimer(self.playTime, tkList)
+                                self.adTrack.start()
+                        self.playing = True
                 return
             except Exception as e:
-                log(xbmc.LOGERROR, '[%s] onPlayBackStarted err=%s' % (TRACKER, str(e)))
+                logerr('[%s] onPlayBackStarted err=%s' % (TRACKER, e))
                 return
 
     def onPlayBackEnded(self):
         try:
-            log(xbmc.LOGDEBUG, '[%s] ended %s' % (TRACKER, self.url))
-            self.adTrack.join()
+            if self.playing:
+                log('[%s] ended %s' % (TRACKER, self.url))
+                self.adTrack.join()
+                self.playing = False
             return
         except Exception as e:
-            log(xbmc.LOGERROR, '[%s] onPlayBackEnded err=%s' % (TRACKER, str(e)))
+            logerr('[%s] onPlayBackEnded err=%s' % (TRACKER, e))
             return
 
     def onPlayBackStopped(self):
         try:
-            log(xbmc.LOGDEBUG, '[%s] stopping %s' % (TRACKER, self.url))
-            self.adTrack.join()
+            if self.playing:
+                log('[%s] stopping %s' % (TRACKER, self.url))
+                self.adTrack.join()
+                self.playing = False
             return
         except Exception as e:
-            log(xbmc.LOGERROR, '[%s] onPlayBackStopped err=%s' % (TRACKER, str(e)))
+            logerr('[%s] onPlayBackStopped err=%s' % (TRACKER, e))
             return
 
 
 # Starting tracker
 
-log(xbmc.LOGINFO, '[%s] Loading HKTV Tracker' % TRACKER)
+loginfo('[%s] Loading HKTV Tracker' % TRACKER)
 
 player = hktvTracker()
 
 while not xbmc.abortRequested:
     xbmc.sleep(1000)
 
-log(xbmc.LOGINFO, '[%s] Shutting down ...' % TRACKER)
+loginfo('[%s] Shutting down ...' % TRACKER)
 
 #
 #   They tried to bury us.

@@ -65,15 +65,15 @@ def parse_argv():
 def login(username=None, password=None):
     global cj
 
-    log(xbmc.LOGDEBUG, 'user length: ' + str(username.__len__()))
-    log(xbmc.LOGDEBUG, 'pass length: ' + str(password.__len__()))
+    log('user length: %s' % username.__len__())
+    log('pass length: %s' % password.__len__())
     try:
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         req = urllib2.Request(loginURL)
         payload = { 'j_username' : username, 'j_password' : password  }
         resp = opener.open(req, urllib.urlencode(payload))
 
-        log(xbmc.LOGDEBUG, 'Save cookie: ' + COOKIE)
+        log('Save cookie: %s' % COOKIE)
         cj.save(COOKIE, ignore_discard=True)
     except:
         popup(addon.getLocalizedString(9010))
@@ -131,13 +131,13 @@ def getEpg():
     # Get EPG
     cache = cacheLoad(EPG_CACHE)
     if cache is None:
-        log(xbmc.LOGDEBUG, 'EPG loading...')
+        log('EPG loading...')
         req = urllib2.Request(tvEpgURL)
         resp = opener.open(req)
         eJson = json.loads(resp.read())
         cacheSave(EPG_CACHE, json.dumps(eJson))
     else:
-        log(xbmc.LOGDEBUG, 'EPG using cache')
+        log('EPG using cache')
         eJson = json.loads(cache.decode(UTF8))
 
     return eJson
@@ -154,14 +154,14 @@ def getAllPlaylist(lim=20, clearCache=False):
     # Get feature playlist
     cache = cacheLoad(FEATURE_CACHE)
     if cache is None:
-        log(xbmc.LOGDEBUG, 'Feature list loading...')
+        log('Feature list loading...')
         req = urllib2.Request(fListURL)
         payload = { 'lim' : lim, 'ofs' : '0' }
         resp = opener.open(req, urllib.urlencode(payload))
         fJson = json.loads(resp.read())
         cacheSave(FEATURE_CACHE, json.dumps(fJson))
     else:
-        log(xbmc.LOGDEBUG, 'Feature list using cache')
+        log('Feature list using cache')
         fJson = json.loads(cache.decode(UTF8))
 
     if 'promo_video' in fJson:
@@ -187,14 +187,14 @@ def getAllPlaylist(lim=20, clearCache=False):
     # Get program playlist
     cache = cacheLoad(PROGRAM_CACHE)
     if cache is None:
-        log(xbmc.LOGDEBUG, 'Program list loading...')
+        log('Program list loading...')
         req = urllib2.Request(pListURL)
         payload = { 'lim' : lim, 'ofs' : '0' }
         resp = opener.open(req, urllib.urlencode(payload))
         aJson = json.loads(resp.read())
         cacheSave(PROGRAM_CACHE, json.dumps(aJson))
     else:
-        log(xbmc.LOGDEBUG, 'Program list using cache')
+        log('Program list using cache')
         aJson = json.loads(cache.decode(UTF8))
 
     if 'videos' in aJson:
@@ -226,14 +226,14 @@ def getShopPlaylist(lim=50, clearCache=False):
     # Get shopping playlist
     cache = cacheLoad(SHOPPING_CACHE)
     if cache is None:
-        log(xbmc.LOGDEBUG, 'Shopping list loading...')
+        log('Shopping list loading...')
         req = urllib2.Request(sListURL)
         payload = { 'lim' : lim, 'ofs' : '0' }
         resp = opener.open(req, urllib.urlencode(payload))
         sJson = json.loads(resp.read())
         cacheSave(SHOPPING_CACHE, json.dumps(sJson))
     else:
-        log(xbmc.LOGDEBUG, 'Shopping list using cache')
+        log('Shopping list using cache')
         sJson = json.loads(cache.decode(UTF8))
 
     if 'videos' in sJson:
@@ -315,7 +315,7 @@ def parseAds(xml):
             ads[idx]['track'] = tkList
 
     except Exception as e:
-        log(xbmc.LOGERROR, 'Error parsing Ads, err=%s' % str(e))
+        logerr('Error parsing Ads, err=%s' % e)
 
     return ads
 
@@ -338,15 +338,15 @@ def getAds(muid, uid, ads_cat, tok, vid, vn, vt):
                     'vid'  : vid,
                     'vn'   : vn,
                     'vt'   : vt   }
-        log(xbmc.LOGDEBUG, 'getAds:%s' % (urllib.urlencode(payload)))
+        log('getAds:%s' % urllib.urlencode(payload))
         resp = opener.open(req, urllib.urlencode(payload))
         mXML = resp.read()
-        #log(xbmc.LOGDEBUG, 'mXML:%s' % (mXML))
+        #log('mXML:%s' % mXML)
 
         ads = parseAds(mXML)
         return ads
     except Exception as e:
-        log(xbmc.LOGERROR, 'Error loading Ads, err=%s' % str(e))
+        logerr('Error loading Ads, err=%s' % e)
         return ads
 
 
@@ -382,7 +382,7 @@ EPG_CACHE = os.path.join(USERDATAPATH, 'epg.json')
 
 
 # Start
-log(xbmc.LOGINFO, '### Start HKTV App version ' + __addonversion__)
+loginfo('### Start HKTV App version %s' % __addonversion__)
 baseURL = sys.argv[0]
 addonHandle = int(sys.argv[1])
 
@@ -390,18 +390,18 @@ xbmcplugin.setContent(addonHandle, 'tvshows')
 
 # Load Cookies
 try:
-    log(xbmc.LOGDEBUG, 'Load cookie: %s' % COOKIE)
+    log('Load cookie: %s' % COOKIE)
     cj.load(COOKIE, ignore_discard=True)
 except Exception as e:
-    log(xbmc.LOGERROR, 'Error loading %s, err=%s' % (COOKIE, str(e)))
+    logerr('Error loading %s, err=%s' % (COOKIE, e))
 
 parse_argv()
 
-log(xbmc.LOGDEBUG, 'Mode: '+ str(mode) +', args[uid,muid,tok,expy,pvid,pgid] = '+ ','.join([uid,muid,tok,expy,pvid,pgid]))
-log(xbmc.LOGDEBUG, 'Addon Profile: '+ __addonprofile__)
+log('Mode: %s, args[uid,muid,tok,expy,pvid,pgid] = %s' % (mode, ','.join([uid,muid,tok,expy,pvid,pgid])))
+log('Addon Profile: %s' % __addonprofile__)
 if mode == None:
 
-    log(xbmc.LOGINFO, 'Selected Main Menu')
+    loginfo('Selected Main Menu')
 
     # Login
     if uid == '1':
@@ -411,7 +411,8 @@ if mode == None:
             popup(addon.getLocalizedString(9000))
         elif not hktvUser:
             popup(addon.getLocalizedString(8000))
-        log(xbmc.LOGDEBUG, 'User ID: '+ uid)
+            addon.openSettings()
+        log('User ID: %s' % uid)
 
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
@@ -459,7 +460,7 @@ if mode == None:
                             'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['pvid']),
                             'pgid' : str(v['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
-                log(xbmc.LOGDEBUG, 'Episode: pvid='+v['pvid']+', vid='+v['vid']+', playURL='+playURL)
+                log('Episode: pvid=%s, vid=%s, playURL=%s' % (v['pvid'], v['vid'], playURL))
                 #vd = getVideoDetail(int(v['vid']))
                 #if 'synopsis' in vd:
                 #    desc = vd['synopsis']
@@ -474,7 +475,7 @@ if mode == None:
                 payload = { 'mode' : p['v_level'], 'muid' : muid,
                             'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pgid' : str(p['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
-                log(xbmc.LOGDEBUG, 'Program: pgid='+p['pgid']+', vid='+p['vid']+', playURL='+playURL)
+                log('Program: pgid=%s, vid=%s, playURL=%s' % (p['pgid'], p['vid'], playURL))
                 #pd = getVideoDetail(int(p['vid']))
                 #if 'synopsis' in pd:
                 #    desc = pd['synopsis']
@@ -482,7 +483,7 @@ if mode == None:
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
-    log(xbmc.LOGDEBUG, 'Auto Live: '+ autoLive)
+    log('Auto Live: %s' % autoLive)
     if autoLive == 'true' and liveURL:
         popup(addon.getLocalizedString(1000))
         xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(liveURL, liveItem)
@@ -490,11 +491,11 @@ if mode == None:
     if failCount > 0:
         popup(addon.getLocalizedString(9020))
 
-    log(xbmc.LOGINFO, 'Finished Main Menu')
+    loginfo('Finished Main Menu')
 
 elif mode == 1:
 
-    log(xbmc.LOGINFO, 'Selected Parent VID: ' + pvid)
+    loginfo('Selected Parent VID: %s' % pvid)
 
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
@@ -514,17 +515,17 @@ elif mode == 1:
                 # insert Ads
                 if 'ads_cat' in pList:
                     adInfo = getAds(muid, uid, pList['ads_cat'], tok, v['vid'], v['title'], v['category'])
-                    #log(xbmc.LOGDEBUG, 'AdInfo:'+ str(adInfo))
+                    #log('AdInfo: %s'+ adInfo)
                     for ad in range(adInfo.__len__()):
                         if 'media' in adInfo[ad]:
                            ai = xbmcgui.ListItem(v['title'], thumbnailImage=v['thumbnail'])
                            adInfoJson = json.dumps(adInfo[ad])
-                           #log(xbmc.LOGDEBUG, 'adInfoJson:'+ str(dIndex) +'-'+ adInfoJson)
+                           #log('adInfoJson:%s-%s' % (dIndex, adInfoJson))
                            ai.setInfo(type='video', infoLabels={ 'Plot': adInfoJson })      # plot as metadata
                            ai.setInfo(type='video', infoLabels={ 'PlotOutline': 'ADS' })
                            mediaURL = adInfo[ad]['media']
                            dPlaylist.add(url=mediaURL, listitem=ai, index=dIndex)
-                           log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ mediaURL)
+                           log('Playlist: %s-%s' % (dIndex, mediaURL))
                            dIndex += 1
                 # insert video
                 li = xbmcgui.ListItem(v['title'], thumbnailImage=v['thumbnail'])
@@ -533,7 +534,7 @@ elif mode == 1:
                     playURL = pList['m3u8']
                     li.setInfo(type='video', infoLabels={ 'PlotOutline': v['category'] })
                     dPlaylist.add(url=playURL, listitem=li, index=dIndex)
-                    log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
+                    log('Playlist:%s-%s' % (dIndex, ','.join([v['vid'], v['category'], v['v_level'], v['pvid']])))
                     dIndex += 1
                 else:
                     failCount += 1
@@ -543,11 +544,11 @@ elif mode == 1:
     else:
         xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist)
 
-    log(xbmc.LOGINFO, 'Finished Parent VID: ' + pvid)
+    loginfo('Finished Parent VID: %s' % pvid)
 
 elif mode == 2:
 
-    log(xbmc.LOGINFO, 'Selected Program VID: ' + pgid)
+    loginfo('Selected Program VID: %s' % pgid)
 
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
@@ -560,7 +561,7 @@ elif mode == 2:
                             'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['pvid']),
                             'pgid' : str(v['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
-                log(xbmc.LOGDEBUG, 'Program: pgid='+v['pgid']+', vid='+v['vid']+', playURL='+playURL)
+                log('Program: pgid=%s, vid=%s, playURL=%s' % (v['pgid'], v['vid'], playURL))
                 #vd = getVideoDetail(int(v['vid']))
                 #if 'synopsis' in vd:
                 #    desc = vd['synopsis']
@@ -568,11 +569,11 @@ elif mode == 2:
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
-    log(xbmc.LOGINFO, 'Finished Program VID: ' + pgid)
+    loginfo('Finished Program VID: %s' % pgid)
 
 elif mode == 3:
 
-    log(xbmc.LOGINFO, 'Selected Program / Parent VID : ' + pgid + '/' + pvid)
+    loginfo('Selected Program / Parent VID : %s / %s' % (pgid, pvid))
 
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
@@ -592,17 +593,17 @@ elif mode == 3:
                 # insert Ads
                 if 'ads_cat' in pList:
                     adInfo = getAds(muid, uid, pList['ads_cat'], tok, v['vid'], v['title'], v['category'])
-                    #log(xbmc.LOGDEBUG, 'AdInfo:'+ str(adInfo))
+                    #log('AdInfo:%s' % adInfo)
                     for ad in range(adInfo.__len__()):
                         if 'media' in adInfo[ad]:
                            ai = xbmcgui.ListItem(v['title'], thumbnailImage=v['thumbnail'])
                            adInfoJson = json.dumps(adInfo[ad])
-                           #log(xbmc.LOGDEBUG, 'adInfoJson:'+ str(dIndex) +'-'+ adInfoJson)
+                           #log('adInfoJson:%s-%s' % (dIndex, adInfoJson))
                            ai.setInfo(type='video', infoLabels={ 'Plot': adInfoJson })      # plot as metadata
                            ai.setInfo(type='video', infoLabels={ 'PlotOutline': 'ADS' })
                            mediaURL = adInfo[ad]['media']
                            dPlaylist.add(url=mediaURL, listitem=ai, index=dIndex)
-                           log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ mediaURL)
+                           log('Playlist:%s-%s' % (dIndex, mediaURL))
                            dIndex += 1
                 # insert video
                 li = xbmcgui.ListItem(v['title'], thumbnailImage=v['thumbnail'])
@@ -611,7 +612,7 @@ elif mode == 3:
                     playURL = pList['m3u8']
                     li.setInfo(type='video', infoLabels={ 'PlotOutline': v['category'] })
                     dPlaylist.add(url=playURL, listitem=li, index=dIndex)
-                    log(xbmc.LOGDEBUG, 'Playlist:'+ str(dIndex) +'-'+ ','.join([v['vid'], v['category'], v['v_level'], v['pvid']]))
+                    log('Playlist:%s-%s' % (dIndex, ','.join([v['vid'], v['category'], v['v_level'], v['pvid']])))
                     dIndex += 1
                 else:
                     failCount += 1
@@ -621,11 +622,11 @@ elif mode == 3:
     else:
         xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(dPlaylist)
 
-    log(xbmc.LOGINFO, 'Finished Program / Parent VID : ' + pgid + '/' + pvid)
+    loginfo('Finished Program / Parent VID : %s / %s' % (pgid, pvid))
 
 elif mode == 10:
 
-    log(xbmc.LOGINFO, 'Selected EPG')
+    loginfo('Selected EPG')
 
     today = datetime.datetime.today().replace(hour=0,minute=0,second=0,microsecond=0)
     tmw   = today + datetime.timedelta(days=1)
@@ -682,15 +683,15 @@ elif mode == 10:
                     epgLine = epgLineForm % (textColor, dayText, eTime.strftime('%H:%M'), e['title'])
                 createListItem(epgLine, '', baseURL , '0', '', playable='false', folder=False)
     except Exception as e:
-        log(xbmc.LOGERROR, 'EPG err=%s' % str(e))
+        logerr('EPG err=%s' % e)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
-    log(xbmc.LOGINFO, 'Finished EPG')
+    loginfo('Finished EPG')
 
 elif mode == 20:
 
-    log(xbmc.LOGINFO, 'Selected Shopping List')
+    loginfo('Selected Shopping List')
 
     # Retrieve Playlist
     shopList = getShopPlaylist(vshopLim)
@@ -702,16 +703,16 @@ elif mode == 20:
                         'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pvid' : str(v['vid']),
                         'pgid' : str(v['vid']) }
             playURL = baseURL +'?'+ urllib.urlencode(payload)
-            log(xbmc.LOGDEBUG, 'Shopping: vid='+v['vid']+', playURL='+playURL)
+            log('Shopping: vid=%s, playURL=%s' % (v['vid'], playURL))
             createListItem(v['title'], v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
-    log(xbmc.LOGINFO, 'Finished Shopping List')
+    loginfo('Finished Shopping List')
 
 elif mode == 21:
 
-    log(xbmc.LOGINFO, 'Selected Shopping VID: ' + pvid)
+    loginfo('Selected Shopping VID: %s' % pvid)
 
     pList = getVideoPlaylist(int(pvid))
     if 'm3u8' in pList:
@@ -725,7 +726,7 @@ elif mode == 21:
     else:
         popup(addon.getLocalizedString(9020))
 
-    log(xbmc.LOGINFO, 'Finished Shopping VID: ' + pvid)
+    loginfo('Finished Shopping VID: %s' % pvid)
 
 #
 #   Do not go gentle into that good night,

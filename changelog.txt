@@ -1,3 +1,7 @@
+v0.2.6
+- open settings menu if not yet setup HKTV user
+- minor bug fix and enhancement
+
 v0.2.5
 - add script to install / uninstall autoexec.py
 

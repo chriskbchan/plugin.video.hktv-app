@@ -12,9 +12,19 @@ __addonicon__ = addon.getAddonInfo('icon')
 cacheSec = int(addon.getSetting('cachesec'))
 
 
-def log(level, txt):
+def log(txt):
     message = '[%s]: %s' % (__addonid__, txt.encode('ascii', 'ignore'))
-    xbmc.log(msg=message, level=level)
+    xbmc.log(msg=message, level=xbmc.LOGDEBUG)
+
+
+def logerr(txt):
+    message = '[%s]: %s' % (__addonid__, txt.encode('ascii', 'ignore'))
+    xbmc.log(msg=message, level=xbmc.LOGERROR)
+
+
+def loginfo(txt):
+    message = '[%s]: %s' % (__addonid__, txt.encode('ascii', 'ignore'))
+    xbmc.log(msg=message, level=xbmc.LOGINFO)
 
 
 def dequote(u):
@@ -30,36 +40,36 @@ def popup(txt):
 
 
 def cacheSave(fn, data, forceClear=False):
-    log(xbmc.LOGDEBUG, 'Save cache: ' + fn)
+    log('Save cache: %s' % fn)
     if xbmcvfs.exists(fn):
         eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheSec
         cTime = int(time.time())
-        log(xbmc.LOGDEBUG, 'cTime=' + str(cTime) + ', eTime=' + str(eTime))
+        log('cTime=%s, eTime=%s' % (cTime, eTime))
         if cTime > eTime:
-            log(xbmc.LOGDEBUG, 'Cache reset: expired')
+            log('Cache reset: expired')
             xbmcvfs.delete(fn)
         elif forceClear:
-            log(xbmc.LOGDEBUG, 'Cache reset: force clear')
+            log('Cache reset: force clear')
             xbmcvfs.delete(fn)
 
     try:
         fh = xbmcvfs.File(fn, 'w')
         fh.write(data)
         fh.close()
-        log(xbmc.LOGDEBUG, 'Cache saved')
+        log('Cache saved')
     except Exception as e:
-        log(xbmc.LOGERROR, 'Error saving cache '+ fn +', err='+ str(e))
+        logerr('Error saving cache %s, err=%s' % (fn, e))
 
 
 def cacheLoad(fn):
-    log(xbmc.LOGDEBUG, 'Load cache: ' + fn)
+    log('Load cache: %s' % fn)
     data = None
     if xbmcvfs.exists(fn):
         eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheSec
         cTime = int(time.time())
-        log(xbmc.LOGDEBUG, 'cTime=' + str(cTime) + ', eTime=' + str(eTime))
+        log('cTime=%s, eTime=%s' % (cTime, eTime))
         if cTime > eTime:
-            log(xbmc.LOGDEBUG, 'Cache reset: expired')
+            log('Cache reset: expired')
             xbmcvfs.delete(fn)
         else:
             fh = xbmcvfs.File(fn)
@@ -79,7 +89,7 @@ def xbmcJsonRequest(params):
             return resp['result']
         return None
     except KeyError:
-        log(xbmc.LOGERROR, '[%s] %s' % (params['method'], resp['error']['message']))
+        logerr('[%s] %s' % (params['method'], resp['error']['message']))
         return None
 
 

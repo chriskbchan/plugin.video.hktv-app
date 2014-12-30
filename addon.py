@@ -208,11 +208,12 @@ def getAllPlaylist(lim=20, clearCache=False):
                   'title'    : progInfo[p]['title'].encode(UTF8),
                   'thumbnail': progInfo[p]['thumbnail']
                 })
-            dramaInfo = progInfo[p]['child_nodes']
-            for p2 in range(dramaInfo.__len__()):
-                di = flattenJsonInfo(dramaInfo[p2], int(progInfo[p]['video_id']))
-                for v in range(di.__len__()):
-                    aList.append(di[v])
+            if 'child_nodes' in progInfo[p]:
+                dramaInfo = progInfo[p]['child_nodes']
+                for p2 in range(dramaInfo.__len__()):
+                    di = flattenJsonInfo(dramaInfo[p2], int(progInfo[p]['video_id']))
+                    for v in range(di.__len__()):
+                        aList.append(di[v])
 
     return (vList, pList, aList)
 

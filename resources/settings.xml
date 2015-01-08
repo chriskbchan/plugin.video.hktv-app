@@ -6,6 +6,8 @@
     </category>
     <category label="32200">
         <setting label="32222" type="bool" id="autolive" default="false"/>
+        <setting label="32229" type="bool" id="elistrev" default="true"/>
+        <setting label="32230" type="bool" id="getplot"  default="false"/>
         <setting type="sep"/>
         <setting label="32224" type="bool" id="showfeat" default="true"/>
         <setting label="32225" type="bool" id="showprog" default="true"/>

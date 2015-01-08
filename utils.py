@@ -35,14 +35,27 @@ def dequote(u):
     return u
 
 
+def boolean(s):
+    if s == 'true':
+        return True
+    else:
+        return False
+
+
 def popup(txt):
     xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (__addonname__, txt.encode(UTF8), 5000, __addonicon__))
 
 
-def cacheSave(fn, data, forceClear=False):
+def cacheSave(fn, data, cacheTime=cacheSec, forceClear=False):
     log('Save cache: %s' % fn)
+
+    path = os.path.dirname(os.path.abspath(fn))
+    if not os.path.exists(path):
+        log('Create path: %s' % path)
+        xbmcvfs.mkdirs(path)
+
     if xbmcvfs.exists(fn):
-        eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheSec
+        eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheTime
         cTime = int(time.time())
         log('cTime=%s, eTime=%s' % (cTime, eTime))
         if cTime > eTime:
@@ -61,11 +74,11 @@ def cacheSave(fn, data, forceClear=False):
         logerr('Error saving cache %s, err=%s' % (fn, e))
 
 
-def cacheLoad(fn):
+def cacheLoad(fn, cacheTime=cacheSec):
     log('Load cache: %s' % fn)
     data = None
     if xbmcvfs.exists(fn):
-        eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheSec
+        eTime = int(xbmcvfs.Stat(fn).st_mtime()) + cacheTime
         cTime = int(time.time())
         log('cTime=%s, eTime=%s' % (cTime, eTime))
         if cTime > eTime:

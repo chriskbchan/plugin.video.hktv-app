@@ -27,5 +27,11 @@ cacheClear(PROGRAM_CACHE)
 cacheClear(SHOPPING_CACHE)
 cacheClear(EPG_CACHE)
 
+META_PATH = os.path.join(USERDATAPATH, 'meta')
+(dirs, files) = xbmcvfs.listdir(META_PATH)
+for fn in files:
+    #xbmc.log(msg=fn, level=xbmc.LOGDEBUG)
+    xbmcvfs.delete(os.path.join(META_PATH, fn))
+
 txt = addon.getLocalizedString(1060)
 xbmc.executebuiltin('Notification(%s, %s, %d, %s)' % (__addonname__, txt.encode(UTF8), 5000, __addonicon__))

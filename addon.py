@@ -2,7 +2,7 @@
 # HKTV App 香港電視
 # Written by chriskbchan
 
-import urllib, urllib2, cookielib, json, uuid
+import urllib, urllib2, cookielib, json, uuid, re
 import xbmc, xbmcgui, xbmcaddon, xbmcplugin, xbmcvfs
 import os, time, datetime, sys
 from xml.etree import ElementTree
@@ -15,11 +15,13 @@ hktvUser = addon.getSetting('username')
 hktvPass = addon.getSetting('password')
 videoLim = addon.getSetting('maxvideos')
 vshopLim = addon.getSetting('maxshops')
-autoLive = addon.getSetting('autolive')
-showEpg  = addon.getSetting('showepg')
-showShop = addon.getSetting('showshop')
-showFeat = addon.getSetting('showfeat')
-showProg = addon.getSetting('showprog')
+autoLive = boolean(addon.getSetting('autolive'))
+eListRev = boolean(addon.getSetting('elistrev'))
+getPlot  = boolean(addon.getSetting('getplot'))
+showEpg  = boolean(addon.getSetting('showepg'))
+showShop = boolean(addon.getSetting('showshop'))
+showFeat = boolean(addon.getSetting('showfeat'))
+showProg = boolean(addon.getSetting('showprog'))
 #cacheSec = int(addon.getSetting('cachesec'))
 __addonname__ = addon.getAddonInfo('name')
 __addonicon__ = addon.getAddonInfo('icon')
@@ -256,12 +258,35 @@ def getShopPlaylist(lim=50, clearCache=False):
 def getVideoDetail(vid):
     # Video details
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    req = urllib2.Request(vInfoURL)
-    payload = { 'vid'  : str(vid) }
-    resp = opener.open(req, urllib.urlencode(payload))
-    vInfo = json.loads(resp.read())
+
+    META_CACHE = os.path.join(USERDATAPATH, 'meta', '%s.cache' % vid)
+    CACHE_1MONTH = 30*24*60*60
+    cache = cacheLoad(META_CACHE, cacheTime=CACHE_1MONTH)
+    if cache is None:
+        log('Metadata loading, vid=%s ...' % vid)
+        req = urllib2.Request(vInfoURL)
+        payload = { 'vid'  : str(vid) }
+        resp = opener.open(req, urllib.urlencode(payload))
+        vInfo = json.loads(resp.read())
+        cacheSave(META_CACHE, json.dumps(vInfo), cacheTime=CACHE_1MONTH)
+    else:
+        log('Metadata using cache, vid=%s' % vid)
+        vInfo = json.loads(cache.decode(UTF8))
 
     return vInfo
+
+
+def getSummary(vid):
+    # Video Plot Summary
+    summary = ''
+    try:
+        pMeta = getVideoDetail(int(v['vid']))
+        if 'synopsis' in pMeta:
+            summary = re.sub('(<br/>)+', ' ', pMeta['synopsis'])
+    except Exception as e:
+        logerr('Error getting summary, err=%s' % e)
+
+    return summary
 
 
 def getVideoPlaylist(vid):
@@ -439,21 +464,21 @@ if mode == None:
                 failCount += 1
             liveItem = createListItem(liveTitle, v['thumbnail'], liveURL, v['duration'], '', playable='true', folder=False)
 
-    if showEpg == 'true':
+    if showEpg:
         epgText = 'HKTV '+addon.getLocalizedString(1030)
         payload = { 'mode' : '10' }
         epgURL = baseURL +'?'+ urllib.urlencode(payload)
         createListItem(epgText, defaultThumbnail, epgURL , '0', epgText, playable='false', folder=True)
 
     # Shopping
-    if showShop == 'true':
+    if showShop:
         shopText = 'HKTV '+addon.getLocalizedString(1005)
         payload = { 'mode' : '20', 'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy) }
         shopURL = baseURL +'?'+ urllib.urlencode(payload)
         createListItem(shopText, defaultThumbnail, shopURL , '0', shopText, playable='false', folder=True)
 
     # Feature
-    if showFeat == 'true':
+    if showFeat:
         for i in range(videoList.__len__()):
             v = videoList[i]
             if v['category'] == 'DRAMA' and v['v_level'] == '1':  # Episode Parent
@@ -462,14 +487,14 @@ if mode == None:
                             'pgid' : str(v['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
                 log('Episode: pvid=%s, vid=%s, playURL=%s' % (v['pvid'], v['vid'], playURL))
-                #vd = getVideoDetail(int(v['vid']))
-                #if 'synopsis' in vd:
-                #    desc = vd['synopsis']
+                plot = ''
+                if getPlot:
+                    plot = getSummary(v['vid'])
                 videoTitle = '[COLOR white][%s][/COLOR] %s' % (addon.getLocalizedString(1011).encode(UTF8), v['title'])
-                createListItem(videoTitle, v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
+                createListItem(videoTitle, v['thumbnail'], playURL, v['duration'], plot, playable='true', folder=True)
 
     # Program
-    if showProg == 'true':
+    if showProg:
         for i in range(progList.__len__()):
             p = progList[i]
             if p['category'] == 'DRAMA' and p['v_level'] == '2':  # Program Parent
@@ -477,15 +502,12 @@ if mode == None:
                             'uid'  : str(uid), 't'    : str(tok), 'expy' : str(expy), 'pgid' : str(p['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
                 log('Program: pgid=%s, vid=%s, playURL=%s' % (p['pgid'], p['vid'], playURL))
-                #pd = getVideoDetail(int(p['vid']))
-                #if 'synopsis' in pd:
-                #    desc = pd['synopsis']
                 createListItem(p['title'], p['thumbnail'], playURL, '0', '', playable='false', folder=True)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 
     log('Auto Live: %s' % autoLive)
-    if autoLive == 'true' and liveURL:
+    if autoLive and liveURL:
         popup(addon.getLocalizedString(1000))
         xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(liveURL, liveItem)
 
@@ -554,6 +576,10 @@ elif mode == 2:
     # Retrieve Playlist
     (videoList, progList, allList) = getAllPlaylist(videoLim)
 
+    if eListRev:
+        loginfo('List in reverse order')
+        allList.reverse()
+
     for i in range(allList.__len__()):
         v = allList[i]
         if v['category'] == 'DRAMA' and v['pgid'] == pgid:
@@ -563,10 +589,10 @@ elif mode == 2:
                             'pgid' : str(v['pgid']) }
                 playURL = baseURL +'?'+ urllib.urlencode(payload)
                 log('Program: pgid=%s, vid=%s, playURL=%s' % (v['pgid'], v['vid'], playURL))
-                #vd = getVideoDetail(int(v['vid']))
-                #if 'synopsis' in vd:
-                #    desc = vd['synopsis']
-                createListItem(v['title'], v['thumbnail'], playURL, v['duration'], '', playable='true', folder=True)
+                plot = ''
+                if getPlot:
+                    plot = getSummary(v['vid'])
+                createListItem(v['title'], v['thumbnail'], playURL, v['duration'], plot, playable='true', folder=True)
 
     xbmcplugin.endOfDirectory(handle=addonHandle)
 

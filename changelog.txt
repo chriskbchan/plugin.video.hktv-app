@@ -1,3 +1,6 @@
+v0.2.9
+- hot fix
+
 v0.2.8
 - option to sort episodes in reverse order
 - option to download plot summary

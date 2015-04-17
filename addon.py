@@ -109,19 +109,20 @@ def flattenJsonInfo(dInfo, progID=0):
         'thumbnail': dInfo['thumbnail'],
         'duration' : dInfo['duration']
       })
-    dChildInfo = dInfo['child_nodes']
-    parentVID = dInfo['video_id']
-    for c in range(dChildInfo.__len__()):
-      dList.append(
-        { 'category' : dChildInfo[c]['category'],
-          'v_level'  : dChildInfo[c]['video_level'],
-          'pgid'     : str(progID),
-          'vid'      : dChildInfo[c]['video_id'],
-          'pvid'     : parentVID,
-          'title'    : dChildInfo[c]['title'].encode(UTF8),
-          'thumbnail': dChildInfo[c]['thumbnail'],
-          'duration' : dChildInfo[c]['duration']
-        })
+    if 'child_nodes' in dInfo:
+      dChildInfo = dInfo['child_nodes']
+      parentVID = dInfo['video_id']
+      for c in range(dChildInfo.__len__()):
+        dList.append(
+          { 'category' : dChildInfo[c]['category'],
+            'v_level'  : dChildInfo[c]['video_level'],
+            'pgid'     : str(progID),
+            'vid'      : dChildInfo[c]['video_id'],
+            'pvid'     : parentVID,
+            'title'    : dChildInfo[c]['title'].encode(UTF8),
+            'thumbnail': dChildInfo[c]['thumbnail'],
+            'duration' : dChildInfo[c]['duration']
+          })
 
     return dList
 
